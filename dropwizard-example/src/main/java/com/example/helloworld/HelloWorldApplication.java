@@ -31,6 +31,10 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
+import org.stagemonitor.web.servlet.ServletPlugin;
+import org.eclipse.jetty.util.component.AbstractLifeCycle;
+import org.eclipse.jetty.util.component.LifeCycle;
+
 import java.util.Map;
 
 public class HelloWorldApplication extends Application<HelloWorldConfiguration> {
@@ -80,6 +84,12 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
 
     @Override
     public void run(HelloWorldConfiguration configuration, Environment environment) {
+		environment.lifecycle().addLifeCycleListener(new AbstractLifeCycle.AbstractLifeCycleListener() {
+		    @Override
+		    public void lifeCycleStarting(LifeCycle event) {
+		        new ServletPlugin.Initializer().onStartup(environment.getApplicationContext().getServletContext());
+		    }
+		});
         final PersonDAO dao = new PersonDAO(hibernateBundle.getSessionFactory());
         final Template template = configuration.buildTemplate();
 
